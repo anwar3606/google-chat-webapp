@@ -1,0 +1,28 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "Google Chat",
+  "main": "main.js",
+  "author": "Anwar",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron --trace-warnings .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "electronVersion": "24.2.0",
+    "appId": "com.anwarh.googlechat",
+    "productName": "GoogleChat",
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "devDependencies": {
+    "electron-builder": "^23.6.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron": "^24.4.0"
+  },
+  "dependencies": {
+  }
+}

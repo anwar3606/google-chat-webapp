@@ -4,7 +4,7 @@ const fs = require("fs");
 const {ipcMain, Notification, nativeImage} = require('electron');
 
 app.setName('Chat');
-app.setAppUserModelId(process.execPath);
+app.setAppUserModelId('Google Chat');
 
 // Check if this is the first instance of the app
 const isFirstInstance = app.requestSingleInstanceLock();

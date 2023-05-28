@@ -25,7 +25,11 @@
       "target": "nsis"
     },
     "linux": {
-      "target": ["AppImage", "deb", "rpm"]
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ]
     }
   },
   "devDependencies": {

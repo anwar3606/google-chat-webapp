@@ -57,7 +57,7 @@ const createWindow = () => {
     // Load the chat app and apply custom CSS
     mainWindow.loadURL("https://chat.google.com").then(r => {
         // enable dev tools if in dev mode
-        mainWindow.webContents.openDevTools();
+        // mainWindow.webContents.openDevTools();
     });
 
     // listen for messages from the renderer process

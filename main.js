@@ -187,4 +187,7 @@ app.on("second-instance", () => {
     }
 });
 
+app.setLoginItemSettings({
+    openAtLogin: true    
+})
 

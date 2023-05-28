@@ -103,7 +103,7 @@ const createWindow = () => {
 
 // Create the tray icon and context menu
 const createTray = () => {
-    tray = new Tray(path.join(__dirname, path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png')));
+    tray = new Tray(path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'));
 
     const contextMenu = Menu.buildFromTemplate([
         {

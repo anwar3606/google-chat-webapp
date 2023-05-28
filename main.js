@@ -2,6 +2,7 @@ const {app, BrowserWindow, Tray, globalShortcut, Menu} = require("electron");
 const path = require("path");
 const fs = require("fs");
 const {ipcMain, Notification, nativeImage} = require('electron');
+
 app.setName('Chat');
 app.setAppUserModelId(process.execPath);
 
@@ -41,24 +42,35 @@ const createWindow = () => {
         height: Math.round(monitor_size.height * 0.7),
     }
 
+    // user agent to firefox
     mainWindow = new BrowserWindow({
+        // frame: false,
         width: window_size.width,
         height: window_size.height,
+        titleBarStyle: "hidden",
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             partition: "persist:webviewsession",
             nodeIntegration: true, // required for ipcMain and ipcRenderer
             contextIsolation: false, // must be false if nodeIntegration is true
+
         },
-        autoHideMenuBar: true,
-        icon: path.join(__dirname, "icon.ico"),
+
+        icon: path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
     });
 
-    // Load the chat app and apply custom CSS
-    mainWindow.loadURL("https://chat.google.com").then(r => {
-        // enable dev tools if in dev mode
-        // mainWindow.webContents.openDevTools();
-    });
+
+    let browserOptions = {}
+    // if linux
+    if (process.platform === 'linux') {
+        browserOptions.userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0";
+    }
+
+    // with firefox user agent
+    mainWindow.loadURL("https://chat.google.com", browserOptions);
+
+    // dev tools
+    // mainWindow.webContents.openDevTools();
 
     // listen for messages from the renderer process
     ipcMain.on('notify', (event, message) => {
@@ -91,7 +103,7 @@ const createWindow = () => {
 
 // Create the tray icon and context menu
 const createTray = () => {
-    tray = new Tray(path.join(__dirname, "icon.ico"));
+    tray = new Tray(path.join(__dirname, path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png')));
 
     const contextMenu = Menu.buildFromTemplate([
         {
@@ -115,12 +127,14 @@ const createTray = () => {
 // Override the close button to minimize instead
 const overrideCloseButton = () => {
     mainWindow.on("close", (event) => {
+
         if (!isQuiting) {
             event.preventDefault();
             mainWindow.hide();
         }
         return false;
     });
+
 };
 
 // Override Alt+F4 to minimize instead

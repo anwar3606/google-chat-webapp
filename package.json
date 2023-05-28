@@ -3,7 +3,14 @@
   "version": "1.0.13",
   "description": "Google Chat",
   "main": "main.js",
-  "author": "Anwar",
+  "categories": [
+    "Other"
+  ],
+  "author": {
+    "name": "Anwar",
+    "email": "anwar.hossain@dsinnovators.com"
+  },
+  "homepage": "https://github.com/anwar3606/google-chat-webapp",
   "license": "MIT",
   "scripts": {
     "start": "electron --trace-warnings .",
@@ -18,7 +25,7 @@
       "target": "nsis"
     },
     "linux": {
-      "target": "AppImage"
+      "target": ["AppImage", "deb", "rpm"]
     }
   },
   "devDependencies": {

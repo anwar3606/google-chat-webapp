@@ -47,7 +47,7 @@ const createWindow = () => {
         // frame: false,
         width: window_size.width,
         height: window_size.height,
-        titleBarStyle: "hidden",
+        // transparent: true,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             partition: "persist:webviewsession",
@@ -57,6 +57,8 @@ const createWindow = () => {
         },
 
         icon: path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
+        // hide menu bar
+        autoHideMenuBar: true,
     });
 
 

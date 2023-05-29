@@ -21,17 +21,29 @@ function getTotalNotificationCount() {
     return Object.values(notificationCounter).reduce((a, b) => a + b, 0);
 }
 
+function setTrayIcon(total) {
+    if (total === 0) {
+        tray.setImage(path.join(__dirname, 'icon.png'));
+    } else {
+        tray.setImage(path.join(__dirname, 'icon_unread.png'));
+    }
+}
+
 function increaseNotificationCount(tag) {
     if (notificationCounter[tag] === undefined) {
         notificationCounter[tag] = 0;
     }
     notificationCounter[tag]++;
-    app.setBadgeCount(getTotalNotificationCount());
+    let total = getTotalNotificationCount();
+    app.setBadgeCount(total);
+    setTrayIcon(total);
 }
 
 function decreaseNotificationCount(tag) {
     notificationCounter[tag] = 0;
-    app.setBadgeCount(getTotalNotificationCount());
+    let total = getTotalNotificationCount();
+    app.setBadgeCount(total);
+    setTrayIcon(total);
 }
 
 // Create the main window
@@ -190,6 +202,6 @@ app.on("second-instance", () => {
 });
 
 app.setLoginItemSettings({
-    openAtLogin: true    
+    openAtLogin: true
 })
 

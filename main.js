@@ -1,4 +1,4 @@
-const {app, BrowserWindow, Tray, globalShortcut, Menu} = require("electron");
+const {app, BrowserWindow, Tray, globalShortcut, Menu, shell} = require("electron");
 const path = require("path");
 const fs = require("fs");
 const {ipcMain, Notification, nativeImage} = require('electron');
@@ -113,6 +113,14 @@ const createWindow = () => {
         // mainWindow.hide();
     });
 
+    // open externel link in default browser
+    mainWindow.webContents.on('did-create-window', (window, details) => {
+        window.close()
+        // console.log(window)
+        // console.log(details)
+        shell.openExternal(details.url);
+    })
+
 };
 
 // Create the tray icon and context menu
@@ -197,6 +205,7 @@ app.on("second-instance", () => {
         if (mainWindow.isMinimized()) {
             mainWindow.restore();
         }
+        mainWindow.show();
         mainWindow.focus();
     }
 });

@@ -94,6 +94,7 @@ const createWindow = () => {
             title: message.title,
             body: message.options.body,
             icon: icon,
+            silent: true
         })
         increaseNotificationCount(message.title);
 

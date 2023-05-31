@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const {ipcMain, Notification, nativeImage} = require('electron');
 const {autoUpdater} = require("electron-updater")
-import log from 'electron-log';
+const {log} = require("electron-log")
 
 app.setName('Chat');
 app.setAppUserModelId('Google Chat');
@@ -204,16 +204,28 @@ app.setLoginItemSettings({
 
 
 autoUpdater.on('checking-for-update', () => {
-    log.info('Checking for update...');
+    new Notification({
+        title: 'Checking for update',
+        body: 'Checking for update'
+    }).show()
 })
 autoUpdater.on('update-available', (info) => {
-    log.info('Update available.');
+    new Notification({
+        title: 'Update available',
+        body: 'Update available'
+    }).show()
 })
 autoUpdater.on('update-not-available', (info) => {
-    log.info('Update not available.');
+    new Notification({
+        title: 'Update not available',
+        body: 'Update not available'
+    }).show()
 })
 autoUpdater.on('error', (err) => {
-    log.info('Error in auto-updater. ' + err);
+    new Notification({
+        title: 'Error',
+        body: 'Error'
+    }).show()
 })
 autoUpdater.on('download-progress', (progressObj) => {
     let log_message = "Download speed: " + progressObj.bytesPerSecond;
@@ -222,5 +234,8 @@ autoUpdater.on('download-progress', (progressObj) => {
     log.info(log_message);
 })
 autoUpdater.on('update-downloaded', (info) => {
-    log.info('Update downloaded');
+    new Notification({
+        title: 'Update downloaded',
+        body: 'Update downloaded'
+    }).show()
 });

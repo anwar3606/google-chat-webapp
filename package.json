@@ -21,6 +21,10 @@
     "electronVersion": "24.2.0",
     "appId": "com.anwarh.googlechat",
     "productName": "Chat",
+    "publish": {
+      "provider": "github",
+      "owner": "anwar3606"
+    },
     "win": {
       "target": "nsis",
       "artifactName": "Google Chat Setup ${version}.${ext}",

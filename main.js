@@ -2,9 +2,12 @@ const {app, BrowserWindow, Tray, globalShortcut, Menu, shell} = require("electro
 const path = require("path");
 const fs = require("fs");
 const {ipcMain, Notification, nativeImage} = require('electron');
+const {autoUpdater} = require("electron-updater")
+import log from 'electron-log';
 
 app.setName('Chat');
 app.setAppUserModelId('Google Chat');
+
 
 // Check if this is the first instance of the app
 const isFirstInstance = app.requestSingleInstanceLock();
@@ -175,7 +178,7 @@ app.whenReady().then(() => {
         }
     });
 
-
+    autoUpdater.checkForUpdatesAndNotify();
 });
 
 // Unregister the global shortcut when the app is quitting
@@ -199,3 +202,25 @@ app.setLoginItemSettings({
     openAtLogin: true
 })
 
+
+autoUpdater.on('checking-for-update', () => {
+    log.info('Checking for update...');
+})
+autoUpdater.on('update-available', (info) => {
+    log.info('Update available.');
+})
+autoUpdater.on('update-not-available', (info) => {
+    log.info('Update not available.');
+})
+autoUpdater.on('error', (err) => {
+    log.info('Error in auto-updater. ' + err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    log.info(log_message);
+})
+autoUpdater.on('update-downloaded', (info) => {
+    log.info('Update downloaded');
+});

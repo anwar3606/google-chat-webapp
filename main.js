@@ -17,9 +17,10 @@ let tray;
 let isQuiting = false;
 let notificationCounter = {};
 
-function getTotalNotificationCount() {
-    return Object.values(notificationCounter).reduce((a, b) => a + b, 0);
-}
+// function getTotalNotificationCount() {
+
+//     return Object.values(notificationCounter).reduce((a, b) => a + b, 0);
+// }
 
 function setTrayIcon(total) {
     if (total === 0) {
@@ -29,22 +30,22 @@ function setTrayIcon(total) {
     }
 }
 
-function increaseNotificationCount(tag) {
-    if (notificationCounter[tag] === undefined) {
-        notificationCounter[tag] = 0;
-    }
-    notificationCounter[tag]++;
-    let total = getTotalNotificationCount();
-    app.setBadgeCount(total);
-    setTrayIcon(total);
-}
+// function increaseNotificationCount(tag) {
+//     if (notificationCounter[tag] === undefined) {
+//         notificationCounter[tag] = 0;
+//     }
+//     notificationCounter[tag]++;
+//     let total = getTotalNotificationCount();
+//     app.setBadgeCount(total);
+//     setTrayIcon(total);
+// }
 
-function decreaseNotificationCount(tag) {
-    notificationCounter[tag] = 0;
-    let total = getTotalNotificationCount();
-    app.setBadgeCount(total);
-    setTrayIcon(total);
-}
+// function decreaseNotificationCount(tag) {
+//     notificationCounter[tag] = 0;
+//     let total = getTotalNotificationCount();
+//     app.setBadgeCount(total);
+//     setTrayIcon(total);
+// }
 
 // Create the main window
 const createWindow = () => {
@@ -88,24 +89,30 @@ const createWindow = () => {
 
     // listen for messages from the renderer process
     ipcMain.on('notify', (event, message) => {
-        console.log('Notification: ', message.options);
+        // console.log('Notification: ', message.options);
         let icon = nativeImage.createFromDataURL(message.iconBase64);
         let notification = new Notification({
             title: message.title,
             body: message.options.body,
             icon: icon,
+            silent: true
         })
-        increaseNotificationCount(message.title);
+        // increaseNotificationCount(message.title);
 
         notification.on('click', () => {
             mainWindow.show();
             mainWindow.webContents.send('notification-clicked', message.options.tag)
-            decreaseNotificationCount(message.title);
+            // decreaseNotificationCount(message.title);
         })
 
         notification.show();
 
     });
+
+    ipcMain.on('unread-fetched', (event, count) => {
+        app.setBadgeCount(count)
+        setTrayIcon(count)
+    })
 
 
     // Hide the window when it loses focus
@@ -173,7 +180,7 @@ const overrideAltF4 = () => {
 const toggleWindow = () => {
     tray.on("click", () => {
         mainWindow.show();
-        app.setBadgeCount(getTotalNotificationCount());
+        // app.setBadgeCount(getTotalNotificationCount());
     });
 };
 
@@ -210,6 +217,7 @@ app.on("second-instance", () => {
     }
 });
 
+// Start the app when OS starts
 app.setLoginItemSettings({
     openAtLogin: true
 })

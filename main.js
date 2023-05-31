@@ -89,7 +89,7 @@ const createWindow = () => {
 
     // listen for messages from the renderer process
     ipcMain.on('notify', (event, message) => {
-        console.log('Notification: ', message.options);
+        // console.log('Notification: ', message.options);
         let icon = nativeImage.createFromDataURL(message.iconBase64);
         let notification = new Notification({
             title: message.title,
@@ -217,6 +217,7 @@ app.on("second-instance", () => {
     }
 });
 
+// Start the app when OS starts
 app.setLoginItemSettings({
     openAtLogin: true
 })

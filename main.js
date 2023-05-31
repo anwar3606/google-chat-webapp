@@ -15,12 +15,6 @@ if (!isFirstInstance) {
 let mainWindow;
 let tray;
 let isQuiting = false;
-let notificationCounter = {};
-
-// function getTotalNotificationCount() {
-
-//     return Object.values(notificationCounter).reduce((a, b) => a + b, 0);
-// }
 
 function setTrayIcon(total) {
     if (total === 0) {
@@ -30,22 +24,28 @@ function setTrayIcon(total) {
     }
 }
 
-// function increaseNotificationCount(tag) {
-//     if (notificationCounter[tag] === undefined) {
-//         notificationCounter[tag] = 0;
-//     }
-//     notificationCounter[tag]++;
-//     let total = getTotalNotificationCount();
-//     app.setBadgeCount(total);
-//     setTrayIcon(total);
-// }
+let notifications = [];
 
-// function decreaseNotificationCount(tag) {
-//     notificationCounter[tag] = 0;
-//     let total = getTotalNotificationCount();
-//     app.setBadgeCount(total);
-//     setTrayIcon(total);
-// }
+function createNotification(title, options, iconBase64) {
+    let icon = nativeImage.createFromDataURL(iconBase64);
+    let notification = new Notification({
+        title: title,
+        body: options.body,
+        icon: icon,
+        silent: true
+    })
+    notifications.push(notification);
+    // increaseNotificationCount(message.title);
+
+    notification.on('click', () => {
+        mainWindow.show();
+        mainWindow.focus()
+        console.log('Notification clicked: ', options.tag)
+        mainWindow.webContents.send('notification-clicked', options.tag)
+    })
+
+    notification.show();
+}
 
 // Create the main window
 const createWindow = () => {
@@ -89,23 +89,8 @@ const createWindow = () => {
 
     // listen for messages from the renderer process
     ipcMain.on('notify', (event, message) => {
-        // console.log('Notification: ', message.options);
-        let icon = nativeImage.createFromDataURL(message.iconBase64);
-        let notification = new Notification({
-            title: message.title,
-            body: message.options.body,
-            icon: icon,
-            silent: true
-        })
-        // increaseNotificationCount(message.title);
-
-        notification.on('click', () => {
-            mainWindow.show();
-            mainWindow.webContents.send('notification-clicked', message.options.tag)
-            // decreaseNotificationCount(message.title);
-        })
-
-        notification.show();
+        console.log('Notification: ', message.options);
+        createNotification(message.title, message.options, message.iconBase64)
 
     });
 
@@ -114,17 +99,9 @@ const createWindow = () => {
         setTrayIcon(count)
     })
 
-
-    // Hide the window when it loses focus
-    mainWindow.on("blur", () => {
-        // mainWindow.hide();
-    });
-
     // open externel link in default browser
     mainWindow.webContents.on('did-create-window', (window, details) => {
         window.close()
-        // console.log(window)
-        // console.log(details)
         shell.openExternal(details.url);
     })
 

@@ -1,17 +1,18 @@
 const {ipcRenderer} = require('electron');
 
 window.renderer = ipcRenderer;
+const notificationStore = {};
 
 // Get Element by using Xpath
 function getElementByXpath(path) {
     return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 }
-  
+
 // Fetching the unread messages count
 function fetchUnreadMessagesCount() {
     // Perform the unread messages count fetching using the DOM
     const count = parseInt(getElementByXpath("/html/body/div[6]/div[3]/div/div[2]/div[1]/div[1]/div[1]/div[1]/span/span[2]/span").innerText) + parseInt(getElementByXpath("/html/body/div[6]/div[3]/div/div[2]/div[1]/div[1]/div[2]/div[2]/span/span[2]/span").innerText);
-  
+
     // Send the fetched count back to the main process
     ipcRenderer.send('unread-fetched', count);
 }
@@ -23,14 +24,14 @@ window.onload = () => {
         // console.log("I am mutation observer");
         fetchUnreadMessagesCount()
     })
-    
+
     const observerConfig = {
         childList: true,
         subtree: true,
         attributes: true,
         characterData: true
     }
-    
+
     observer.observe(document.body, observerConfig)
 }
 
@@ -75,20 +76,19 @@ class CustomNotification {
     }
 
     addEventListener(...args) {
-        // console.log('addEventListener', args)
         if (args[0] === 'click') {
-            ipcRenderer.on('notification-clicked', (event, tag) => {
-                // console.log('notification-clicked', tag)
-                args[1]();
-            })
+            notificationStore[this.options.tag] = args[1];
         }
     }
 
     close() {
-        // return this.notification.close();
         // console.log('close')
     }
 }
+
+ipcRenderer.on('notification-clicked', (event, tag) => {
+    notificationStore[tag]();
+})
 
 // Assign the CustomNotification class to the Notification object
 window.Notification = CustomNotification;

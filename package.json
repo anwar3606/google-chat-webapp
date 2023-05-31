@@ -1,6 +1,6 @@
 {
   "name": "chat",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Google Chat",
   "main": "main.js",
   "categories": [
@@ -13,14 +13,14 @@
   "homepage": "https://github.com/anwar3606/google-chat-webapp",
   "license": "MIT",
   "scripts": {
-    "start": "electron --trace-warnings .",
+    "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },
   "build": {
     "electronVersion": "24.2.0",
     "appId": "com.anwarh.googlechat",
-    "productName": "GoogleChat",
+    "productName": "Chat",
     "win": {
       "target": "nsis"
     },

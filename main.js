@@ -1,9 +1,7 @@
 const {app, BrowserWindow, Tray, globalShortcut, Menu, shell} = require("electron");
 const path = require("path");
-const fs = require("fs");
 const {ipcMain, Notification, nativeImage} = require('electron');
 const {autoUpdater} = require("electron-updater")
-const {log} = require("electron-log")
 
 app.setName('Chat');
 app.setAppUserModelId('Google Chat');
@@ -43,7 +41,6 @@ function createNotification(title, options, iconBase64) {
     notification.on('click', () => {
         mainWindow.show();
         mainWindow.focus()
-        console.log('Notification clicked: ', options.tag)
         mainWindow.webContents.send('notification-clicked', options.tag)
     })
 
@@ -92,7 +89,6 @@ const createWindow = () => {
 
     // listen for messages from the renderer process
     ipcMain.on('notify', (event, message) => {
-        console.log('Notification: ', message.options);
         createNotification(message.title, message.options, message.iconBase64)
 
     });
@@ -227,12 +223,7 @@ autoUpdater.on('error', (err) => {
         body: 'Error'
     }).show()
 })
-autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-    log.info(log_message);
-})
+
 autoUpdater.on('update-downloaded', (info) => {
     new Notification({
         title: 'Update downloaded',

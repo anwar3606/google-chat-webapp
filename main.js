@@ -4,8 +4,7 @@ const {ipcMain, Notification, nativeImage} = require('electron');
 const {autoUpdater} = require("electron-updater")
 
 app.setName('Chat');
-app.setAppUserModelId('Google Chat');
-
+app.setAppUserModelId('com.anwarh.googlechat');
 
 // Check if this is the first instance of the app
 const isFirstInstance = app.requestSingleInstanceLock();

@@ -26,11 +26,35 @@ let mainWindow;
 let tray;
 let isQuiting = false;
 
-function setTrayIcon(total) {
+async function setTrayIcon(total) {
+    let icon_path = path.join(__dirname, 'icon.png')
+
     if (total === 0) {
-        tray.setImage(path.join(__dirname, 'icon.png'));
+        tray.setImage(icon_path);
     } else {
-        tray.setImage(path.join(__dirname, 'icon_unread.png'));
+        const sharp = require('sharp');
+        let img = sharp(icon_path);
+
+        // draw notification count and get the node buffer
+        img = img
+            .resize(128, 128)
+            .composite([{
+                input: Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+                    <circle cx="48" cy="80" r="40" fill="#ffffff95" />
+                    <text x="42" y="110" text-anchor="middle" alignment-baseline="central" 
+                    fill="red" font-size="90px" font-family="sans-serif" font-weight="900"
+                    >${total}</text>
+                </svg>`),
+                left: 0,
+                top: 0
+            }])
+            .png()
+
+        let node_buffer = await img.toBuffer();
+
+        // convert to native image and set tray icon
+        let icon = nativeImage.createFromBuffer(node_buffer);
+        tray.setImage(icon);
     }
 }
 

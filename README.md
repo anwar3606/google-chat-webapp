@@ -9,10 +9,11 @@ An unofficial desktop application for the Google Chat built with Eletron.js
 
 * System tray
     - Close the app to tray when you close the app window
+    - Shows pinned Spaces and Chat to directly open them
+    - Shows unread message count
 * Desktop notifications
     - Clicking on notification bring the app to focus and open the specific person chat/room
 * Unread message counter in dock
-* Unread indicator in tray
 * Auto start the app when you log in to your machine
 
 ## Installation

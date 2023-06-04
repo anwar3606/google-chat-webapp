@@ -2,7 +2,6 @@ const {
     app,
     BrowserWindow,
     Tray,
-    globalShortcut,
     Menu,
     MenuItem,
     shell,
@@ -15,18 +14,25 @@ const {autoUpdater} = require("electron-updater")
 
 app.setName('Chat');
 app.setAppUserModelId('com.anwarh.googlechat');
+Menu.setApplicationMenu(null)
+app.commandLine.appendSwitch('disable-site-isolation-trials')
+
 
 // Check if this is the first instance of the app
 const isFirstInstance = app.requestSingleInstanceLock();
 if (!isFirstInstance) {
     app.quit();
+
 }
 
 let mainWindow;
 let tray;
 let isQuiting = false;
+let notifications = [];
 
 async function setTrayIcon(total) {
+    if (!tray) return;
+
     let strippedPath = __dirname.replace('app.asar', '');
     let iconPath = path.join(strippedPath, 'icon.png');
 
@@ -59,7 +65,6 @@ async function setTrayIcon(total) {
     }
 }
 
-let notifications = [];
 
 function createNotification(title, options, iconBase64) {
     let icon = nativeImage.createFromDataURL(iconBase64);
@@ -96,6 +101,7 @@ const createWindow = () => {
         height: window_size.height,
         // transparent: true,
         webPreferences: {
+            webSecurity: false,
             preload: path.join(__dirname, "preload.js"),
             partition: "persist:webviewsession",
             nodeIntegration: true, // required for ipcMain and ipcRenderer
@@ -121,23 +127,11 @@ const createWindow = () => {
     // dev tools
     // mainWindow.webContents.openDevTools();
 
-    // listen for messages from the renderer process
-    ipcMain.on('notify', (event, message) => {
-        createNotification(message.title, message.options, message.iconBase64)
-
-    });
-
-    ipcMain.on('unread-fetched', (event, count) => {
-        app.setBadgeCount(count)
-        setTrayIcon(count)
-    })
-
     // open externel link in default browser
     mainWindow.webContents.on('did-create-window', (window, details) => {
         window.close()
         shell.openExternal(details.url);
     })
-
 };
 
 // creates a context menu for spellchecking and suggestions
@@ -169,15 +163,14 @@ function createContextMenu() {
 
 
 // Create the tray icon and context menu
-const createTray = () => {
+const createTray = (pinnedChats) => {
+    if (tray) tray.destroy();
     tray = new Tray(path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'));
 
-    const contextMenu = Menu.buildFromTemplate([
+    const templates = [
         {
             label: "Show App",
-            click: () => {
-                mainWindow.show();
-            },
+            click: () => mainWindow.show(),
         },
         {
             label: "Quit",
@@ -186,9 +179,39 @@ const createTray = () => {
                 app.quit();
             },
         },
-    ]);
+    ];
 
-    tray.setContextMenu(contextMenu);
+    const chats = [];
+    const spaces = [];
+
+    pinnedChats.forEach(chat => {
+        let img = nativeImage.createFromDataURL(chat.iconBase64).resize({width: 16, height: 16});
+
+        const submenuItem = {
+            label: chat.name,
+            click: () => {
+                mainWindow.show();
+                mainWindow.webContents.send('chat-clicked', chat.chatId)
+            },
+            icon: img,
+        };
+
+        if (chat.type === 'Chat') chats.push(submenuItem);
+        else spaces.push(submenuItem);
+    });
+
+    if (chats.length > 0) {
+        templates.push({type: 'separator'});
+        templates.push(...chats);
+    }
+
+    if (spaces.length > 0) {
+        if (chats.length > 0) templates.push({type: 'separator'});
+        templates.push(...spaces);
+    }
+
+    tray.setContextMenu(Menu.buildFromTemplate(templates));
+    tray.on("click", () => mainWindow.show());
 };
 
 // Override the close button to minimize instead
@@ -214,21 +237,25 @@ const overrideAltF4 = () => {
     });
 };
 
-// Toggle the window when the tray icon is clicked
-const toggleWindow = () => {
-    tray.on("click", () => {
-        mainWindow.show();
-    });
-};
+ipcMain.on('pinned-chats', (event, pinnedChats) => {
+    createTray(pinnedChats)
+})
 
+// listen for messages from the renderer process
+ipcMain.on('notify', (event, message) => {
+    createNotification(message.title, message.options, message.iconBase64)
+});
+
+ipcMain.on('unread-fetched', (event, count) => {
+    app.setBadgeCount(count)
+    setTrayIcon(count)
+})
 // Create the main window and tray icon, and register event listeners
 app.whenReady().then(() => {
     createWindow();
     createContextMenu();
-    createTray();
     overrideCloseButton();
     overrideAltF4();
-    toggleWindow();
 
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -239,10 +266,6 @@ app.whenReady().then(() => {
     autoUpdater.checkForUpdatesAndNotify();
 });
 
-// Unregister the global shortcut when the app is quitting
-app.on("will-quit", () => {
-    globalShortcut.unregisterAll();
-});
 
 // Handle second instance of the app
 app.on("second-instance", () => {

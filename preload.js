@@ -18,6 +18,36 @@ function fetchUnreadMessagesCount() {
     ipcRenderer.send('unread-fetched', count);
 }
 
+async function sendPinnedChatsToMainProcess() {
+    let pinnedChats = []
+
+    let iframes = document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]');
+    for (let i = 0; i < iframes.length; i++) {
+        let iframe = iframes[i];
+        // ipcRenderer.send('pinned-chat', {type: iframe.title, src: iframe.src})
+        let pinnedChatsElement = iframe.contentDocument.documentElement.querySelectorAll('span[data-starred="true"]');
+        for (let j = 0; j < pinnedChatsElement.length; j++) {
+            let chat = pinnedChatsElement[j];
+            let chatId = chat.id
+            let type = iframe.title
+
+            let name;
+            if (iframe.title === 'Chat') {
+                name = chat.querySelector('span[data-name]').innerText;
+            } else {
+                name = chat.querySelector('span[title]').title
+            }
+            let avatarUrl = chat.querySelector('img').src;
+
+            // download the avatar
+            let iconBase64 = await downloadIcon(avatarUrl)
+            pinnedChats.push({chatId, name, iconBase64, type})
+        }
+    }
+
+    ipcRenderer.send('pinned-chats', pinnedChats)
+}
+
 // Calling the function when the window is loaded
 window.onload = () => {
     fetchUnreadMessagesCount();
@@ -34,6 +64,10 @@ window.onload = () => {
     }
 
     observer.observe(document.body, observerConfig)
+
+    setTimeout(() => {
+        sendPinnedChatsToMainProcess();
+    }, 5000)
 }
 
 
@@ -42,17 +76,15 @@ const oldNotification = window.Notification;
 async function downloadIcon(iconUrl) {
     let response = await fetch(iconUrl);
     let blob = await response.blob();
-    let reader = new FileReader();
+    let base64data = await new Promise((resolve, reject) => {
+        let reader = new FileReader();
 
-    return new Promise((resolve, reject) => {
-        reader.onloadend = function () {
-            let base64data = reader.result;
-            resolve(base64data);
-        };
-
+        reader.onloadend = () => resolve(reader.result);
         reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
+
+    return base64data;
 }
 
 
@@ -89,6 +121,23 @@ class CustomNotification {
 
 ipcRenderer.on('notification-clicked', (event, tag) => {
     notificationStore[tag]();
+})
+
+ipcRenderer.on('chat-clicked', (event, chatId) => {
+    let iframes = document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]');
+    for (let i = 0; i < iframes.length; i++) {
+        let iframe = iframes[i];
+        let chat = iframe.contentDocument.getElementById(chatId);
+        if (chat) {
+            let downEvent = new MouseEvent('mousedown', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            chat.dispatchEvent(downEvent);
+            break;
+        }
+    }
 })
 
 // Assign the CustomNotification class to the Notification object

@@ -1,6 +1,16 @@
-const {app, BrowserWindow, Tray, globalShortcut, Menu, shell} = require("electron");
+const {
+    app,
+    BrowserWindow,
+    Tray,
+    globalShortcut,
+    Menu,
+    MenuItem,
+    shell,
+    ipcMain,
+    Notification,
+    nativeImage
+} = require("electron");
 const path = require("path");
-const {ipcMain, Notification, nativeImage} = require('electron');
 const {autoUpdater} = require("electron-updater")
 
 app.setName('Chat');
@@ -105,6 +115,34 @@ const createWindow = () => {
 
 };
 
+// creates a context menu for spellchecking and suggestions
+function createContextMenu() {
+    mainWindow.webContents.on('context-menu', (event, params) => {
+        const menu = new Menu()
+
+        // Add each spelling suggestion
+        for (const suggestion of params.dictionarySuggestions) {
+            menu.append(new MenuItem({
+                label: suggestion,
+                click: () => mainWindow.webContents.replaceMisspelling(suggestion)
+            }))
+        }
+
+        // Allow users to add the misspelled word to the dictionary
+        if (params.misspelledWord) {
+            menu.append(
+                new MenuItem({
+                    label: 'Add to dictionary',
+                    click: () => mainWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+                })
+            )
+        }
+
+        menu.popup()
+    })
+}
+
+
 // Create the tray icon and context menu
 const createTray = () => {
     tray = new Tray(path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'));
@@ -162,6 +200,7 @@ const toggleWindow = () => {
 // Create the main window and tray icon, and register event listeners
 app.whenReady().then(() => {
     createWindow();
+    createContextMenu();
     createTray();
     overrideCloseButton();
     overrideAltF4();

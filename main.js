@@ -27,17 +27,14 @@ let tray;
 let isQuiting = false;
 
 async function setTrayIcon(total) {
-    let icon_path = path.join(__dirname, 'icon.png')
+    let strippedPath = __dirname.replace('app.asar', '');
+    let iconPath = path.join(strippedPath, 'icon.png');
 
     if (total === 0) {
-        tray.setImage(icon_path);
+        tray.setImage(iconPath);
     } else {
         const sharp = require('sharp');
-
-        // remove app.asar from path
-        let strippedPath = __dirname.replace('app.asar', '');
-        let execPath = path.join(strippedPath, 'icon.png');
-        let img = sharp(execPath);
+        let img = sharp(iconPath);
 
         // draw notification count and get the node buffer
         img = img
@@ -221,7 +218,6 @@ const overrideAltF4 = () => {
 const toggleWindow = () => {
     tray.on("click", () => {
         mainWindow.show();
-        // app.setBadgeCount(getTotalNotificationCount());
     });
 };
 

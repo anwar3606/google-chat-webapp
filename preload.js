@@ -3,6 +3,35 @@ const {ipcRenderer} = require('electron');
 window.renderer = ipcRenderer;
 const notificationStore = {};
 
+
+class CustomNotification {
+    constructor(title, options) {
+        this.title = title;
+        this.options = options;
+        downloadIcon(options.icon).then(iconBase64 => ipcRenderer.send('notify', {title, options, iconBase64}));
+    }
+
+    static async requestPermission() {
+        await oldNotification.requestPermission();
+    }
+
+    static get permission() {
+        return oldNotification.permission;
+    }
+
+    addEventListener(...args) {
+        if (args[0] === 'click') notificationStore[this.options.tag] = args[1];
+    }
+
+    close() {
+        // console.log('close')
+    }
+}
+
+const oldNotification = window.Notification;
+window.Notification = CustomNotification;
+
+
 // Get Element by using Xpath
 function getElementByXpath(path) {
     return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -19,126 +48,59 @@ function fetchUnreadMessagesCount() {
 }
 
 async function sendPinnedChatsToMainProcess() {
-    let pinnedChats = []
+    const pinnedChats = [];
 
-    let iframes = document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]');
-    for (let i = 0; i < iframes.length; i++) {
-        let iframe = iframes[i];
-        // ipcRenderer.send('pinned-chat', {type: iframe.title, src: iframe.src})
-        let pinnedChatsElement = iframe.contentDocument.documentElement.querySelectorAll('span[data-starred="true"]');
-        for (let j = 0; j < pinnedChatsElement.length; j++) {
-            let chat = pinnedChatsElement[j];
-            let chatId = chat.id
-            let type = iframe.title
+    for (const iframe of document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]')) {
+        const type = iframe.title;
+        const pinnedChatsElement = iframe.contentDocument.querySelectorAll(`span[data-starred="true"]`);
 
-            let name;
-            if (iframe.title === 'Chat') {
-                name = chat.querySelector('span[data-name]').innerText;
-            } else {
-                name = chat.querySelector('span[title]').title
-            }
-            let avatarUrl = chat.querySelector('img').src;
+        for (const chat of pinnedChatsElement) {
+            const chatId = chat.id;
+            const name = type === 'Chat' ? chat.querySelector('span[data-name]').innerText : chat.querySelector('span[title]').title;
+            const avatarUrl = chat.querySelector('img').src;
+            const iconBase64 = await downloadIcon(avatarUrl);
 
-            // download the avatar
-            let iconBase64 = await downloadIcon(avatarUrl)
-            pinnedChats.push({chatId, name, iconBase64, type})
+            pinnedChats.push({chatId, name, iconBase64, type});
         }
     }
 
-    ipcRenderer.send('pinned-chats', pinnedChats)
+    ipcRenderer.send('pinned-chats', pinnedChats);
 }
 
 // Calling the function when the window is loaded
 window.onload = () => {
     fetchUnreadMessagesCount();
-    const observer = new MutationObserver(() => {
-        // console.log("I am mutation observer");
-        fetchUnreadMessagesCount()
-    })
 
-    const observerConfig = {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        characterData: true
-    }
+    const observer = new MutationObserver(fetchUnreadMessagesCount);
+    observer.observe(document.body, {childList: true, subtree: true, attributes: true, characterData: true});
 
-    observer.observe(document.body, observerConfig)
+    setTimeout(sendPinnedChatsToMainProcess, 5000);
+};
 
-    setTimeout(() => {
-        sendPinnedChatsToMainProcess();
-    }, 5000)
-}
-
-
-const oldNotification = window.Notification;
 
 async function downloadIcon(iconUrl) {
-    let response = await fetch(iconUrl);
-    let blob = await response.blob();
-    let base64data = await new Promise((resolve, reject) => {
-        let reader = new FileReader();
-
+    const response = await fetch(iconUrl);
+    const blob = await response.blob();
+    return await new Promise(resolve => {
+        const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
-
-    return base64data;
 }
 
-
-class CustomNotification {
-    constructor(title, options) {
-        // store the parameters
-        this.title = title;
-        this.options = options;
-
-        downloadIcon(options.icon).then(iconBase64 => {
-            ipcRenderer.send('notify', {title, options, iconBase64})
-        })
-    }
-
-    // pass along all other methods
-    static async requestPermission() {
-        await oldNotification.requestPermission();
-    }
-
-    static get permission() {
-        return oldNotification.permission;
-    }
-
-    addEventListener(...args) {
-        if (args[0] === 'click') {
-            notificationStore[this.options.tag] = args[1];
-        }
-    }
-
-    close() {
-        // console.log('close')
-    }
-}
 
 ipcRenderer.on('notification-clicked', (event, tag) => {
     notificationStore[tag]();
 })
 
 ipcRenderer.on('chat-clicked', (event, chatId) => {
-    let iframes = document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]');
-    for (let i = 0; i < iframes.length; i++) {
-        let iframe = iframes[i];
-        let chat = iframe.contentDocument.getElementById(chatId);
+    const iframes = document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]');
+    for (const iframe of iframes) {
+        const chat = iframe.contentDocument.getElementById(chatId);
         if (chat) {
-            let downEvent = new MouseEvent('mousedown', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            });
-            chat.dispatchEvent(downEvent);
+            chat.dispatchEvent(new MouseEvent('mousedown', {bubbles: true, cancelable: true, view: window}));
             break;
         }
     }
-})
+});
 
-// Assign the CustomNotification class to the Notification object
-window.Notification = CustomNotification;

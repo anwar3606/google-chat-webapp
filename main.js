@@ -187,7 +187,11 @@ app.on("second-instance", () => {
         if (mainWindow.isMinimized()) {
             mainWindow.restore();
         }
-        mainWindow.show();
+
+        if (!mainWindow.isVisible()) {
+            mainWindow.show();
+        }
+
         mainWindow.focus();
     }
 });
@@ -198,34 +202,16 @@ app.setLoginItemSettings({
 })
 
 
-autoUpdater.on('checking-for-update', () => {
-    new Notification({
-        title: 'Checking for update',
-        body: 'Checking for update'
-    }).show()
-})
-autoUpdater.on('update-available', (info) => {
-    new Notification({
-        title: 'Update available',
-        body: 'Update available'
-    }).show()
-})
-autoUpdater.on('update-not-available', (info) => {
-    new Notification({
-        title: 'Update not available',
-        body: 'Update not available'
-    }).show()
-})
 autoUpdater.on('error', (err) => {
     new Notification({
-        title: 'Error',
-        body: 'Error'
+        title: 'Failed to update',
+        body: 'Reason: ' + err
     }).show()
 })
 
 autoUpdater.on('update-downloaded', (info) => {
     new Notification({
         title: 'Update downloaded',
-        body: 'Update downloaded'
+        body: 'Update will be installed on restart'
     }).show()
 });

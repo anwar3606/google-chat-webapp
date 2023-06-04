@@ -33,7 +33,11 @@ async function setTrayIcon(total) {
         tray.setImage(icon_path);
     } else {
         const sharp = require('sharp');
-        let img = sharp(icon_path);
+
+        // remove app.asar from path
+        let strippedPath = __dirname.replace('app.asar', '');
+        let execPath = path.join(strippedPath, 'icon.png');
+        let img = sharp(execPath);
 
         // draw notification count and get the node buffer
         img = img

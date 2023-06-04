@@ -1,6 +1,6 @@
 {
   "name": "chat",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Google Chat",
   "main": "main.js",
   "categories": [
@@ -25,6 +25,15 @@
       "provider": "github",
       "owner": "anwar3606"
     },
+    "extraResources": [
+      {
+        "from": "./",
+        "to": "./",
+        "filter": [
+          "*.png"
+        ]
+      }
+    ],
     "win": {
       "target": "nsis",
       "artifactName": "Google Chat Setup ${version}.${ext}",

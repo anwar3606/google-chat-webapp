@@ -16,7 +16,7 @@ const {autoUpdater} = require("electron-updater")
 app.setName('Chat');
 app.setAppUserModelId('com.anwarh.googlechat');
 Menu.setApplicationMenu(null)
-app.commandLine.appendSwitch('disable-site-isolation-trials')
+// app.commandLine.appendSwitch('disable-site-isolation-trials')
 
 
 // Check if this is the first instance of the app
@@ -89,7 +89,6 @@ const createWindow = () => {
         width: windowSize.width,
         height: windowSize.height,
         webPreferences: {
-            webSecurity: false,
             preload: path.join(__dirname, 'preload.js'),
             partition: 'persist:webviewsession',
             nodeIntegration: true,
@@ -140,7 +139,7 @@ function createContextMenu() {
 
 
 // Create the tray icon and context menu
-const createTray = (pinnedChats) => {
+const createTray = () => {
     if (tray) tray.destroy();
     tray = new Tray(path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'));
 
@@ -153,23 +152,6 @@ const createTray = (pinnedChats) => {
             }
         },
     ];
-
-    const chats = [];
-    const spaces = [];
-
-    pinnedChats.forEach(chat => {
-        const img = nativeImage.createFromDataURL(chat.iconBase64).resize({width: 16, height: 16});
-        const submenuItem = {
-            label: chat.name, click: () => {
-                mainWindow.show();
-                mainWindow.webContents.send('chat-clicked', chat.chatId)
-            }, icon: img
-        };
-        (chat.type === 'Chat' ? chats : spaces).push(submenuItem);
-    });
-
-    if (chats.length > 0) templates.push({type: 'separator'}, ...chats);
-    if (spaces.length > 0) templates.push(...(chats.length > 0 ? [{type: 'separator'}] : []), ...spaces);
 
     tray.setContextMenu(Menu.buildFromTemplate(templates));
     tray.on('click', () => mainWindow.show());
@@ -198,9 +180,6 @@ const overrideAltF4 = () => {
     });
 };
 
-ipcMain.on('pinned-chats', (event, pinnedChats) => {
-    createTray(pinnedChats)
-})
 
 // listen for messages from the renderer process
 ipcMain.on('notify', (event, message) => {
@@ -217,6 +196,7 @@ app.whenReady().then(() => {
     createContextMenu()
     overrideCloseButton()
     overrideAltF4()
+    createTray()
 })
 
 app.on('activate', () => {

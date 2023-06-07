@@ -47,26 +47,6 @@ function fetchUnreadMessagesCount() {
     ipcRenderer.send('unread-fetched', count);
 }
 
-async function sendPinnedChatsToMainProcess() {
-    const pinnedChats = [];
-
-    for (const iframe of document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]')) {
-        const type = iframe.title;
-        const pinnedChatsElement = iframe.contentDocument.querySelectorAll(`span[data-starred="true"]`);
-
-        for (const chat of pinnedChatsElement) {
-            const chatId = chat.id;
-            const name = type === 'Chat' ? chat.querySelector('span[data-name]').innerText : chat.querySelector('span[title]').title;
-            const avatarUrl = chat.querySelector('img').src;
-            const iconBase64 = await downloadIcon(avatarUrl);
-
-            pinnedChats.push({chatId, name, iconBase64, type});
-        }
-    }
-
-    ipcRenderer.send('pinned-chats', pinnedChats);
-}
-
 // Calling the function when the window is loaded
 window.onload = () => {
     fetchUnreadMessagesCount();
@@ -74,9 +54,7 @@ window.onload = () => {
     const observer = new MutationObserver(fetchUnreadMessagesCount);
     observer.observe(document.body, {childList: true, subtree: true, attributes: true, characterData: true});
 
-    setTimeout(sendPinnedChatsToMainProcess, 5000);
 };
-
 
 async function downloadIcon(iconUrl) {
     const response = await fetch(iconUrl);
@@ -88,19 +66,6 @@ async function downloadIcon(iconUrl) {
     });
 }
 
-
 ipcRenderer.on('notification-clicked', (event, tag) => {
     notificationStore[tag]();
 })
-
-ipcRenderer.on('chat-clicked', (event, chatId) => {
-    const iframes = document.querySelectorAll('iframe[title="Chat"], iframe[title="Spaces"]');
-    for (const iframe of iframes) {
-        const chat = iframe.contentDocument.getElementById(chatId);
-        if (chat) {
-            chat.dispatchEvent(new MouseEvent('mousedown', {bubbles: true, cancelable: true, view: window}));
-            break;
-        }
-    }
-});
-

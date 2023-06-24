@@ -13,7 +13,11 @@ const {
 const path = require("path");
 const {autoUpdater} = require("electron-updater")
 
-app.setName('Chat');
+if (process.platform === 'win32') {
+    app.setName('Chat');
+} else {
+    app.setName('Google Chat');
+}
 app.setAppUserModelId('com.anwarh.googlechat');
 // Menu.setApplicationMenu(null)
 // app.commandLine.appendSwitch('disable-site-isolation-trials')

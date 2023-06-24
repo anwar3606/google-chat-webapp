@@ -40,6 +40,7 @@
       "verifyUpdateCodeSignature": false
     },
     "linux": {
+      "executableName": "Google Chat",
       "target": [
         "AppImage",
         "deb",

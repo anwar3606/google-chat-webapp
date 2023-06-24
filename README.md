@@ -70,6 +70,15 @@ or
 * [@anwar3606](https://github.com/anwar3606) for the whole project
 * [@mdyamin007](https://github.com/mdyamin007) for some enhancements
 
+## Development
+
+Sharp needs to be built from source if you face issue with libvips. You can follow the steps below to build it from
+
+```shell
+export SHARP_IGNORE_GLOBAL_LIBVIPS=1
+npm install --build-from-source sharp
+```
+
 ## Disclaimer
 
 This desktop application is simply a wrapper that launches a local web instance and runs the google chat web application

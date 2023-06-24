@@ -18,6 +18,11 @@ if (process.platform === 'win32') {
 } else {
     app.setName('Google Chat');
 }
+
+
+const strippedPath = __dirname.replace('app.asar', '');
+const iconPath = path.join(strippedPath, 'icon.png');
+
 app.setAppUserModelId('com.anwarh.googlechat');
 // Menu.setApplicationMenu(null)
 // app.commandLine.appendSwitch('disable-site-isolation-trials')
@@ -145,7 +150,12 @@ function createContextMenu() {
 // Create the tray icon and context menu
 const createTray = () => {
     if (tray) tray.destroy();
-    tray = new Tray(path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'));
+
+    const strippedPath = __dirname.replace('app.asar', '');
+    const iconPath = path.join(strippedPath, 'icon.png');
+
+
+    tray = new Tray(iconPath);
 
     const templates = [
         {label: 'Show App', click: () => mainWindow.show()},

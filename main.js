@@ -15,7 +15,7 @@ const {autoUpdater} = require("electron-updater")
 
 app.setName('Chat');
 app.setAppUserModelId('com.anwarh.googlechat');
-Menu.setApplicationMenu(null)
+// Menu.setApplicationMenu(null)
 // app.commandLine.appendSwitch('disable-site-isolation-trials')
 
 

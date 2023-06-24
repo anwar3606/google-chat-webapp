@@ -40,8 +40,13 @@ function getElementByXpath(path) {
 // Fetching the unread messages count
 function fetchUnreadMessagesCount() {
     // Perform the unread messages count fetching using the DOM
-    const count = parseInt(getElementByXpath("/html/body/div[6]/div[3]/div/div[2]/div[1]/div[1]/div[1]/div[1]/span/span[2]/span").innerText)
-        + parseInt(getElementByXpath("/html/body/div[6]/div[3]/div/div[2]/div[1]/div[1]/div[2]/div[2]/span/span[2]/span").innerText);
+    let count = 0
+    try {
+        count = parseInt(getElementByXpath("/html/body/div[6]/div[3]/div/div[2]/div[1]/div[1]/div[1]/div[1]/span/span[2]/span").innerText)
+            + parseInt(getElementByXpath("/html/body/div[6]/div[3]/div/div[2]/div[1]/div[1]/div[2]/div[2]/span/span[2]/span").innerText);
+    } catch (e) {
+        console.log(e)
+    }
 
     // Send the fetched count back to the main process
     ipcRenderer.send('unread-fetched', count);

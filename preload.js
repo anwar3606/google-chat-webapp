@@ -38,11 +38,19 @@ function getElementByXpath(path) {
 }
 
 function make_all_children_transparent(mutationsList) {
+    // check if .transparent class exists
+    if (document.querySelector('.transparent')) return;
+
     // create a transparent class
     const style = document.createElement('style');
     style.innerHTML = `
         .transparent {
             background: transparent;
+        }
+        
+        .blur-transparent {
+            background: #00000036;
+            backdrop-filter: blur(10px);
         }
     `;
     document.head.appendChild(style);
@@ -52,8 +60,13 @@ function make_all_children_transparent(mutationsList) {
 
     // // for all the elements
     for (const element of document.querySelectorAll('*')) {
+        // if body
+        if (element.tagName === 'BODY') {
+            // add the transparent class if it doesn't have it
+            if (!element.classList.contains('blur-transparent')) element.classList.add('blur-transparent');
+        }
         // add the transparent class if it doesn't have it
-        if (!element.classList.contains('transparent')) element.classList.add('transparent');
+        else if (!element.classList.contains('transparent')) element.classList.add('transparent');
     }
 }
 

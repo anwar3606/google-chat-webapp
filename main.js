@@ -104,8 +104,8 @@ const createWindow = () => {
     if (IS_WINDOWS_11) {
         console.log('win11')
         win.setAutoTheme();   // Same theme as computer
-        // win.setMicaAcrylicEffect(); // Acrylic for windows 11
-        win.setMicaEffect()
+        win.setMicaAcrylicEffect(); // Acrylic for windows 11
+        // win.setMicaEffect()
         win.setRoundedCorner()
         win.setTitleTextColor('#ffffff')
     } else {
@@ -121,7 +121,7 @@ const createWindow = () => {
     mainWindow.loadURL('https://chat.google.com');
 
     // dev tools
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     // open externel link in default browser
     mainWindow.webContents.on('did-create-window', (window, details) => {
@@ -134,6 +134,13 @@ const createWindow = () => {
 function createContextMenu() {
     mainWindow.webContents.on('context-menu', (event, params) => {
         const menu = new Menu();
+
+        if (params.dictionarySuggestions.length === 0) {
+            menu.append(new MenuItem({
+                label: 'Copy',
+                click: () => mainWindow.webContents.copy()
+            }));
+        }
 
         params.dictionarySuggestions.forEach(suggestion => {
             menu.append(new MenuItem({

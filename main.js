@@ -12,11 +12,12 @@ const {
 } = require("electron");
 const path = require("path");
 const {autoUpdater} = require("electron-updater")
+const {PARAMS, VALUE, MicaBrowserWindow, IS_WINDOWS_11, WIN10} = require('mica-electron');
 
 app.setName('Chat');
 app.setAppUserModelId('com.anwarh.googlechat');
 Menu.setApplicationMenu(null)
-// app.commandLine.appendSwitch('disable-site-isolation-trials')
+app.commandLine.appendSwitch('disable-site-isolation-trials')
 
 
 // Check if this is the first instance of the app
@@ -85,18 +86,33 @@ const createWindow = () => {
         height: Math.round(monitorSize.height * 0.7),
     };
 
-    mainWindow = new BrowserWindow({
+    mainWindow = new MicaBrowserWindow({
         width: windowSize.width,
         height: windowSize.height,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             partition: 'persist:webviewsession',
             nodeIntegration: true,
-            contextIsolation: false,
+            contextIsolation: false
+            // webSecurity: false,
         },
         icon: path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
         autoHideMenuBar: true,
     });
+    mainWindow.setDarkTheme();
+    win = mainWindow;
+    if (IS_WINDOWS_11) {
+        console.log('win11')
+        win.setAutoTheme();   // Same theme as computer
+        // win.setMicaAcrylicEffect(); // Acrylic for windows 11
+        win.setMicaEffect()
+        win.setRoundedCorner()
+        win.setTitleTextColor('#ffffff')
+    } else {
+        console.log('win10')
+        mainWindow.setMicaEffect();
+    }
+
 
     if (process.platform === 'linux') {
         mainWindow.webContents.userAgent = 'Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0';
@@ -200,7 +216,7 @@ app.whenReady().then(() => {
 })
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (MicaBrowserWindow.getAllWindows().length === 0) createWindow();
 })
 
 autoUpdater.checkForUpdatesAndNotify()

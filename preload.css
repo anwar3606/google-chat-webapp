@@ -1,0 +1,10 @@
+/*make all background colors transparent*/
+* {
+    background: transparent !important;
+}
+
+/*all child elements of iframes have transparent backgrounds*/
+iframe * {
+    background: transparent !important;
+}
+

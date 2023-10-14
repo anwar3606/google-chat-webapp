@@ -52,12 +52,32 @@ function fetchUnreadMessagesCount() {
     ipcRenderer.send('unread-fetched', count);
 }
 
+function hideTitleBar() {
+    // hide 'gb_od gb_id gb_ud gb_Mc'
+    const titleBar = document.querySelector('.gb_od.gb_id.gb_ud.gb_Mc');
+    if (titleBar) titleBar.style.display = 'none';
+
+    // set height 'aeN WR anZ baA nH oy8Mbf nn' to 100vh
+    const chatList = document.querySelector('.aeN.WR.anZ.baA.nH.oy8Mbf.nn');
+    if (chatList) chatList.style.height = '100vh';
+
+    // set id ':3' to 100vh
+    const chatList2 = document.querySelector('#\\:3');
+    if (chatList2) chatList2.style.height = '100vh';
+
+    // set iframe 'name="hostFrame1"' to 100vh
+    const chatList3 = document.querySelector('iframe[name="hostFrame1"]');
+    if (chatList3) chatList3.style.height = '100vh';
+}
+
 // Calling the function when the window is loaded
 window.onload = () => {
     fetchUnreadMessagesCount();
 
     const observer = new MutationObserver(fetchUnreadMessagesCount);
     observer.observe(document.body, {childList: true, subtree: true, attributes: true, characterData: true});
+
+    hideTitleBar();
 
 };
 

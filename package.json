@@ -48,7 +48,7 @@
     }
   },
   "devDependencies": {
-    "electron": "^24.4.0",
+    "electron": "^28.3.2",
     "electron-builder": "^23.6.0",
     "electron-squirrel-startup": "^1.0.0"
   },

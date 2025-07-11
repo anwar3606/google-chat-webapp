@@ -48,12 +48,13 @@
     }
   },
   "devDependencies": {
-    "electron": "^28.3.2",
+    "electron": "^28.3.3",
     "electron-builder": "^26.0.12",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.1"
   },
   "dependencies": {
-    "electron-updater": "^6.3.0",
-    "sharp": "^0.32.6"
-  }
+    "electron-updater": "^6.6.2",
+    "sharp": "^0.34.3"
+  },
+  "packageManager": "yarn@4.4.1+sha512.f825273d0689cc9ead3259c14998037662f1dcd06912637b21a450e8da7cfeb4b1965bbee73d16927baa1201054126bc385c6f43ff4aa705c8631d26e12460f1"
 }
